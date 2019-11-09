@@ -1,16 +1,20 @@
+
+IS_DEBUG_MODE = False
 class Cell:
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.value = value
         self.constraints = set()
-        self.temp_value = 0
         self.can_save = []
 
     def __str__(self):
-        string = str(self.value) + ': ' + '('
+        string = ''
+        if IS_DEBUG_MODE:
+            string = str(self.value) + ': '
+            string += str(self.values_can_be())
+        else:
+            string += str(self.value)
         # for i in self.constraints:
-            # string += str(i) + ', '
-        string += str(self.values_can_be())
-        string += ')'
+        # string += str(i) + ', '
         return string
 
     def values_can_be(self):
@@ -35,7 +39,7 @@ class Map:
                 self._add_constraints(i, j, value)
 
     def add_value(self, i, j, value):
-        self.matrix[i][j] = value
+        self.matrix[i][j].value = value
         self._add_constraints(i, j, value)
 
     def _set_values(self, matrix: [[Cell]]):
@@ -72,6 +76,13 @@ class Map:
             string += '\n'
         return string
 
+    def is_solve(self):
+        for row in self.matrix:
+            for col in row:
+                if col.value == 0:
+                    return False
+        return True
+
 
 def get_inputs():
     map = []
@@ -80,6 +91,18 @@ def get_inputs():
     return map
 
 
+def normalize(map: Map):
+    for i in range(9):
+        for j in range(9):
+            cell = map.matrix[i][j]
+            if cell.value == 0 and len(cell.values_can_be()) == 1:
+                cell.value = cell.can_save[0]
+                map.add_value(i, j, cell.value)
+
+
 if __name__ == '__main__':
     map = Map(get_inputs())
+    while not map.is_solve():
+        normalize(map)
+
     print(map)
